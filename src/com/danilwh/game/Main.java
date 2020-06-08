@@ -14,10 +14,12 @@ public class Main extends Canvas {
     private static final int WIDTH = 300;
     private static final int HEIGHT = WIDTH / 16 * 9;
     private static final int SCALE = 3;
+    private String title = "Game";
     private boolean running = false;
     private BufferStrategy bs = null;
     private Graphics g = null;
     private Render render;
+    private JFrame frame = new JFrame(title);
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private int[] pixels = ((DataBufferInt) this.image.getRaster().getDataBuffer()).getData();
     
@@ -34,11 +36,14 @@ public class Main extends Canvas {
             public void run() {
                 // get the current system jvm time in nanoseconds.
                 long jvmLastTime = System.nanoTime();
+                // get the current system jvm time in milliseconds. (for showing in the screen title).
+                long timer = System.currentTimeMillis();
                 // specify the period of time for which only one update must occur. 
                 double jvmPartTime = 1_000_000_000.0 / 60.0;
                 // keep the difference of time between last update time and time at the moment of
                 // the cycle iteration. 
                 double delta = 0.0;
+                int updates = 0;
                 
                 while (running) {
                     // keep the time of the current moment of the cycle iteration.
@@ -50,9 +55,17 @@ public class Main extends Canvas {
                     
                     if (delta >= jvmPartTime) {
                         update();
+                        render();
+                        
+                        updates++;
                         delta = 0;
                     }
-                    render();
+                    
+                    if (System.currentTimeMillis() - timer > 1000) {
+                        timer += 1000;
+                        frame.setTitle(title + " | " + "Updates: " + updates);
+                        updates = 0;
+                    }
                 }
             }
         }).start();
@@ -84,13 +97,12 @@ public class Main extends Canvas {
     private void init() {
         /*** creates the window. ***/
         
-        JFrame frame = new JFrame("Game");
-        frame.setResizable(false);
-        frame.add(this);
-        frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        this.frame.setResizable(false);
+        this.frame.add(this);
+        this.frame.pack();
+        this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.frame.setLocationRelativeTo(null);
+        this.frame.setVisible(true);
     }
     
     public static void main(String[] args) {
