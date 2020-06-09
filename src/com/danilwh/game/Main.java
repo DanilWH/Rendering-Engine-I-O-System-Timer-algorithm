@@ -3,11 +3,14 @@ package com.danilwh.game;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
 import javax.swing.JFrame;
+
+import com.danilwh.game.input.InputHandler;
 
 @SuppressWarnings("serial")
 public class Main extends Canvas {
@@ -22,10 +25,12 @@ public class Main extends Canvas {
     private JFrame frame = new JFrame(title);
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private int[] pixels = ((DataBufferInt) this.image.getRaster().getDataBuffer()).getData();
+    private int x = 0, y = 0;
     
     public Main() {
         setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
         this.render = new Render(WIDTH, HEIGHT, pixels);
+        frame.addKeyListener(new InputHandler());
     }
     
     private void start() {
@@ -39,7 +44,7 @@ public class Main extends Canvas {
                 // get the current system jvm time in milliseconds. (for showing in the screen title).
                 long timer = System.currentTimeMillis();
                 // specify the period of time for which only one update must occur. 
-                double jvmPartTime = 1_000_000_000.0 / 60.0;
+                double jvmPartTime = 1_000_000_000.0 / 160.0;
                 // keep the difference of time between last update time and time at the moment of
                 // the cycle iteration. 
                 double delta = 0.0;
@@ -72,7 +77,10 @@ public class Main extends Canvas {
     }
     
     private void update() {
-        
+        if (InputHandler.isKeyPressed(KeyEvent.VK_UP)) y--;
+        if (InputHandler.isKeyPressed(KeyEvent.VK_DOWN)) y++;
+        if (InputHandler.isKeyPressed(KeyEvent.VK_LEFT)) x--;
+        if (InputHandler.isKeyPressed(KeyEvent.VK_RIGHT)) x++;
     }
     
     private void render() {
@@ -83,7 +91,7 @@ public class Main extends Canvas {
         // clear the array of pixels before we render something.
         this.render.clear();
         // fill the array of pixels with numbers each of that represents a color.
-        this.render.render();
+        this.render.render(this.x, this.y);
         this.g = this.bs.getDrawGraphics();
         this.g.drawImage(this.image, 0, 0, getWidth(), getHeight(), null);
         this.g.dispose();
